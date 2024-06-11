@@ -155,7 +155,7 @@ class DiagNrLogParser:
                             self.parse_float_q7(beam_meas.l_2_nr_filtered_tx_beam_rsrp_l3), self.parse_float_q7(beam_meas.l_2_nr_filtered_tx_beam_rsrq_l3),
                         )
 
-                layer_dict["cells"].append(cell)
+                layer_dict["cells"].append(cell_dict)
             json_dict["layers"].append(layer_dict)
         pkt_ts = util.parse_qxdm_ts(pkt_header.timestamp)
         if self.parent.json:
