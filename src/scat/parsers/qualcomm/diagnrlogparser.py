@@ -6,10 +6,9 @@ import logging
 import binascii
 from collections import namedtuple
 
-import src.scat.util as util
-import src.scat.parsers.qualcomm.diagcmd as diagcmd
-
-from src.scat.parsers.qualcomm.qualcommparser import QualcommParser
+import scat.util as util
+import scat.parsers.qualcomm.diagcmd as diagcmd
+from scat.parsers.qualcomm.qualcommparser import QualcommParser
 
 
 class DiagNrLogParser:
