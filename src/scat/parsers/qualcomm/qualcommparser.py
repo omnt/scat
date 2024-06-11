@@ -61,6 +61,7 @@ class QualcommParser:
         self.combine_stdout = False
         self.check_crc = True
         self.layers = []
+        self.json = False
 
         self.name = 'qualcomm'
         self.shortname = 'qc'
@@ -122,6 +123,8 @@ class QualcommParser:
                 self.check_crc = not params[p]
             elif p == 'layer':
                 self.layers = params[p]
+            elif p == 'json':
+                self.json = params[p]
 
     def sanitize_radio_id(self, radio_id):
         if radio_id <= 0:
