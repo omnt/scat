@@ -78,7 +78,7 @@ class DiagNrLogParser:
             meas_carrier_list_struct = namedtuple('QcDiagNrMl1Packet', 'raster_arfcn num_cells serv_cell_index serv_cell_pci serv_ssb null_0 serv_rsrp_rx_0 serv_rsrp_rx_1 serv_rx_beam_0 serv_rx_beam_1 serv_rfic_id null_1 serv_subarr_0 serv_subarr_1')
             meas_carrier_list = meas_carrier_list_struct._make(struct.unpack('<IBBHB3sIIHHH2sHH', pkt_body[current_offset:current_offset+32]))
             current_offset += 32
-            if args.J:
+            if args['json']:
                 json_dict[layer] = {
                     "Layer": layer,
                     "NR-ARFCN": meas_carrier_list.raster_arfcn,
@@ -111,7 +111,7 @@ class DiagNrLogParser:
                 cell_list_struct = namedtuple('QcDiagNrMl1Packet', 'pci pbch_sfn num_beams null_0 cell_quality_rsrp cell_quality_rsrq')
                 cell_list = cell_list_struct._make(struct.unpack('<HHB3sII', pkt_body[current_offset:current_offset+16]))
                 current_offset += 16
-                if args.J:
+                if args['json']:
                     json_dict[layer][cell] = {
                         "PCI": cell_list.pci,
                         "PBCH SFN": cell_list.pbch_sfn,
@@ -130,7 +130,7 @@ class DiagNrLogParser:
                     beam_meas = beam_meas_struct._make(struct.unpack('<HHHHIQIIIIII', pkt_body[current_offset: current_offset+44]))
                     current_offset+=44
 
-                    if args.J:
+                    if args['json']:
                         json_dict[layer][cell][beam] = {
                             "SSB Index": beam_meas.ssb_index,
                             "RX Beam 0": beam_meas.rx_beam_0,

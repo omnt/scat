@@ -19,10 +19,12 @@ __version__ = importlib.metadata.version(__package__ or 'scat')
 if os.name != 'nt':
     faulthandler.register(signal.SIGUSR1)
 
+
 def sigint_handler(signal, frame):
     global current_parser
     current_parser.stop_diag()
     sys.exit(0)
+
 
 def hexint(string):
     if string[0:2] == '0x' or string[0:2] == '0X':
@@ -30,11 +32,13 @@ def hexint(string):
     else:
         return int(string)
 
+
 class ListUSBAction(argparse.Action):
     # List USB devices and then exit
     def __call__(self, parser, namespace, values, option_string=None):
         scat.iodevices.USBIO().list_usb_devices()
         parser.exit()
+
 
 def scat_main():
     global current_parser
@@ -53,11 +57,15 @@ def scat_main():
     parser.register('action', 'listusb', ListUSBAction)
 
     parser.add_argument('-D', '--debug', help='Print debug information, mostly hexdumps.', action='store_true')
-    parser.add_argument('-t', '--type', help='Baseband type to be parsed.\nAvailable types: {}'.format(', '.join(parser_dict.keys())), required=True)
+    parser.add_argument('-t', '--type',
+                        help='Baseband type to be parsed.\nAvailable types: {}'.format(', '.join(parser_dict.keys())),
+                        required=True)
     parser.add_argument('-l', '--list-devices', help='List USB devices and exit', nargs=0, action='listusb')
     parser.add_argument('-V', '--version', action='version', version='SCAT {}'.format(__version__))
-    parser.add_argument('-L', '--layer', help='Specify the layers to see as GSMTAP packets (comma separated).\nAvailable layers: {}, Default: "ip,nas,rrc"'.format(', '.join(valid_layers)), type=str, default='ip,nas,rrc')
-    parser.add_argument('-J', '--json', help='Print as JSON', action='store_true')
+    parser.add_argument('-L', '--layer',
+                        help='Specify the layers to see as GSMTAP packets (comma separated).\nAvailable layers: {}, Default: "ip,nas,rrc"'.format(
+                            ', '.join(valid_layers)), type=str, default='ip,nas,rrc')
+    parser.add_argument('-J', '--json', help='Print as JSON', action='store_true', default=False)
     input_group = parser.add_mutually_exclusive_group(required=True)
     input_group.add_argument('-s', '--serial', help='Use serial diagnostic port')
     input_group.add_argument('-u', '--usb', action='store_true', help='Use USB diagnostic port')
@@ -78,17 +86,27 @@ def scat_main():
     if 'qc' in parser_dict.keys():
         qc_group = parser.add_argument_group('Qualcomm specific settings')
         qc_group.add_argument('--qmdl', help='Store log as QMDL file (Qualcomm only)')
-        qc_group.add_argument('--qsr-hash', help='Specify QSR message hash file (usually QSRMessageHash.db), implies --msgs', type=str)
-        qc_group.add_argument('--qsr4-hash', help='Specify QSR4 message hash file (need to obtain from the device firmware), implies --msgs', type=str)
+        qc_group.add_argument('--qsr-hash',
+                              help='Specify QSR message hash file (usually QSRMessageHash.db), implies --msgs',
+                              type=str)
+        qc_group.add_argument('--qsr4-hash',
+                              help='Specify QSR4 message hash file (need to obtain from the device firmware), implies --msgs',
+                              type=str)
         qc_group.add_argument('--events', action='store_true', help='Decode Events as GSMTAP logging')
-        qc_group.add_argument('--msgs', action='store_true', help='Decode Extended Message Reports and QSR Message Reports as GSMTAP logging')
-        qc_group.add_argument('--cacombos', action='store_true', help='Display raw values of UE CA combo information on 4G/5G (0xB0CD/0xB826)')
-        qc_group.add_argument('--disable-crc-check', action='store_true', help='Disable CRC mismatch checks. Improves performance by avoiding CRC calculations.')
+        qc_group.add_argument('--msgs', action='store_true',
+                              help='Decode Extended Message Reports and QSR Message Reports as GSMTAP logging')
+        qc_group.add_argument('--cacombos', action='store_true',
+                              help='Display raw values of UE CA combo information on 4G/5G (0xB0CD/0xB826)')
+        qc_group.add_argument('--disable-crc-check', action='store_true',
+                              help='Disable CRC mismatch checks. Improves performance by avoiding CRC calculations.')
 
     if 'sec' in parser_dict.keys():
         sec_group = parser.add_argument_group('Samsung specific settings')
-        sec_group.add_argument('-m', '--model', help='Override autodetected device model for analyzing diagnostic messages', type=str)
-        sec_group.add_argument('--start-magic', help='Magic value provided for starting DM session. Default: 0x41414141', type=str, default='0x41414141')
+        sec_group.add_argument('-m', '--model',
+                               help='Override autodetected device model for analyzing diagnostic messages', type=str)
+        sec_group.add_argument('--start-magic',
+                               help='Magic value provided for starting DM session. Default: 0x41414141', type=str,
+                               default='0x41414141')
         sec_group.add_argument('--sdmraw', help='Store log as raw SDM file (Samsung only)')
         sec_group.add_argument('--trace', action='store_true', help='Decode trace')
         sec_group.add_argument('--ilm', action='store_true', help='Decode ILM')
@@ -97,26 +115,32 @@ def scat_main():
         hisi_group = parser.add_argument_group('HiSilicon specific settings')
         try:
             hisi_group.add_argument('--msgs', action='store_true', help='Decode debug messages GSMTAP logging')
-            hisi_group.add_argument('--disable-crc-check', action='store_true', help='Disable CRC mismatch checks. Improves performance by avoiding CRC calculations.')
+            hisi_group.add_argument('--disable-crc-check', action='store_true',
+                                    help='Disable CRC mismatch checks. Improves performance by avoiding CRC calculations.')
         except argparse.ArgumentError:
             pass
 
     ip_group = parser.add_argument_group('GSMTAP IP settings')
     ip_group.add_argument('-P', '--port', help='Change UDP port to emit GSMTAP packets', type=int, default=4729)
     ip_group.add_argument('--port-up', help='Change UDP port to emit user plane packets', type=int, default=47290)
-    ip_group.add_argument('-H', '--hostname', help='Change base host name/IP to emit GSMTAP packets. For dual SIM devices the subsequent IP address will be used.', type=str, default='127.0.0.1')
+    ip_group.add_argument('-H', '--hostname',
+                          help='Change base host name/IP to emit GSMTAP packets. For dual SIM devices the subsequent IP address will be used.',
+                          type=str, default='127.0.0.1')
 
     ip_group.add_argument('-F', '--pcap-file', help='Write GSMTAP packets directly to specified PCAP file')
-    ip_group.add_argument('-C', '--combine-stdout', action='store_true', help='Write standard output messages as osmocore log file, along with other GSMTAP packets.')
+    ip_group.add_argument('-C', '--combine-stdout', action='store_true',
+                          help='Write standard output messages as osmocore log file, along with other GSMTAP packets.')
 
     args = parser.parse_args()
 
     GSMTAP_IP = args.hostname
     GSMTAP_PORT = args.port
     IP_OVER_UDP_PORT = args.port_up
-
+    global as_json
+    as_json = args.json
     if not args.type in parser_dict.keys():
-        print('Error: invalid baseband type {} specified. Available modules: {}'.format(args.type, ', '.join(parser_dict.keys())))
+        print('Error: invalid baseband type {} specified. Available modules: {}'.format(args.type,
+                                                                                        ', '.join(parser_dict.keys())))
         sys.exit(1)
 
     layers = args.layer.split(',')
@@ -166,7 +190,7 @@ def scat_main():
     else:
         logger.setLevel(logging.INFO)
         current_parser.set_parameter({'log_level': logging.INFO})
-    ch = logging.StreamHandler(stream = sys.stdout)
+    ch = logging.StreamHandler(stream=sys.stdout)
     f = logging.Formatter('%(asctime)s %(name)s (%(funcName)s) %(levelname)s: %(message)s')
     ch.setFormatter(f)
     logger.addHandler(ch)
@@ -180,7 +204,8 @@ def scat_main():
             'cacombos': args.cacombos,
             'combine-stdout': args.combine_stdout,
             'disable-crc-check': args.disable_crc_check,
-            'layer': layers})
+            'layer': layers,
+            'json': args.json})
     elif args.type == 'sec':
         current_parser.set_parameter({
             'model': args.model,
@@ -215,8 +240,9 @@ def scat_main():
     elif args.dump:
         current_parser.read_dump()
     else:
-        assert('Invalid input handler?')
+        assert ('Invalid input handler?')
         sys.exit(1)
+
 
 if __name__ == '__main__':
     scat_main()
