@@ -4,6 +4,7 @@ import struct
 import calendar
 import logging
 import binascii
+import time
 from collections import namedtuple
 
 import scat.util as util
@@ -157,7 +158,8 @@ class DiagNrLogParser:
 
         pkt_ts = util.parse_qxdm_ts(pkt_header.timestamp)
         if self.parent.json:
-            return {'stdout': json.dumps(json_dict, indent=4).rstrip(), 'ts': pkt_ts}
+            json_dict['timestamp'] = time.time_ns()
+            return {'stdout': json.dumps(json_dict).rstrip(), 'ts': pkt_ts}
         return {'stdout': stdout.rstrip(), 'ts': pkt_ts}
 
     # RRC
