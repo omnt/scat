@@ -154,7 +154,7 @@ class DiagNrLogParser:
 
         pkt_ts = util.parse_qxdm_ts(pkt_header.timestamp)
         if self.parent.json:
-            return {'stdout': json.dumps(json_dict, indent=4, sort_keys=True).rstrip(), 'ts': pkt_ts}
+            return {'stdout': json.dumps(json_dict, indent=4).rstrip(), 'ts': pkt_ts}
         return {'stdout': stdout.rstrip(), 'ts': pkt_ts}
 
     # RRC
