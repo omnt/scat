@@ -8,11 +8,10 @@ from collections import namedtuple
 
 import scat.util as util
 import scat.parsers.qualcomm.diagcmd as diagcmd
-from scat.parsers.qualcomm.qualcommparser import QualcommParser
 
 
 class DiagNrLogParser:
-    def __init__(self, parent: QualcommParser):
+    def __init__(self, parent):
         self.parent = parent
 
         i = diagcmd.diag_log_get_lte_item_id
